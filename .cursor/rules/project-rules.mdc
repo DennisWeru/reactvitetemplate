@@ -1,0 +1,75 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+1. Core Architectural Principles
+
+The application’s codebase is organized into three primary logical layers: Shared, Features, and App. A strict one-way data flow is enforced: Shared -> Features -> App. This ensures modularity, reduces coupling, and simplifies maintenance, preventing architectural decay.
+
+2. Code Categories and Their Purpose
+
+All files within the src/ directory are categorized into one of the following “elements” (as defined in eslint-plugin-boundaries):
+	•	shared:
+	•	Purpose: Contains global, reusable code that is independent of specific application features or pages. This includes common utilities, foundational components, global API clients, and core database setup.
+	•	Paths: src/{components,data,drizzle,hooks,lib,server,utils}/**.
+	•	Examples: src/shared/lib/formatters.ts, src/shared/components/Navbar.tsx, src/shared/database/db.ts.
+	•	feature:
+	•	Purpose: Encapsulates all code related to a specific business feature. Each feature folder is self-contained and mirrors the technical structure of the shared layer but contains only feature-specific implementations. All code specific to a feature (UI, database, schemas, server-side, hooks) must reside exclusively within its respective feature folder.
+	•	Paths: src/features/*/ and src/features/*/**.
+	•	Examples: src/features/products/components/ProductGrid.tsx, src/features/users/server/deleteUser.ts.
+	•	app:
+	•	Purpose: Represents the main application core, responsible for orchestrating and composing the UI from shared and feature components. It should primarily contain pages, routing, and global styles. It must not contain any feature-specific logic, components, or data access directly.
+	•	Paths: src/app/**.
+	•	Examples: src/app/dashboard/products/page.tsx, src/app/global.css.
+	•	never-import:
+	•	Purpose: Designates specific files or folders that should never be imported by other parts of the application, typically for sensitive or isolated code.
+	•	Paths: src/{middleware,tasks}/**.
+	•	Examples: src/middleware.ts, src/tasks/cleanup.ts.
+
+3. Strict Import Rules (ESLint Boundaries Logic)
+
+By default, all imports are disallowed unless explicitly permitted below. Adhere strictly to these rules:
+	•	shared can import from shared:
+	•	Allowed: src/shared/lib/cache.ts imports src/shared/lib/formatters.ts.
+	•	Disallowed: src/shared/components/Button.tsx imports src/features/products/ProductCard.tsx.
+	•	feature can import from shared:
+	•	Allowed: src/features/products/database/getProducts.ts imports src/shared/database/db.ts.
+	•	Disallowed: src/features/products/ProductForm.tsx imports src/app/dashboard/products/page.tsx.
+	•	feature can import from the same feature:
+	•	Allowed: src/features/products/components/ProductForm.tsx imports src/features/products/schemas/productSchema.ts.
+	•	Crucial: feature cannot import from other feature folders (e.g., src/features/products/ProductForm.tsx imports src/features/users/components/UserAvatar.tsx is disallowed). This is the cornerstone of enforcing true feature independence and reduces the “blast radius” of changes.
+	•	app can import from shared:
+	•	Allowed: src/app/layout.tsx imports src/shared/components/Navbar.tsx.
+	•	app can import from feature:
+	•	Allowed: src/app/dashboard/products/page.tsx imports src/features/products/components/ProductGrid.tsx.
+	•	app can import CSS files:
+	•	Allowed: src/app/global.css imported in src/main.tsx or src/app/layout.tsx.
+	•	never-import can import from shared or feature:
+	•	Allowed: src/middleware.ts imports src/shared/lib/auth.ts or src/features/users/server/getUserSession.ts.
+
+4. React + Vite Specific Guidelines
+
+In addition to the structural rules, the following guidelines apply to React + Vite development:
+	•	Component Naming: React components should use PascalCase (e.g., ProductCard.tsx).
+	•	Styling: Prefer Tailwind CSS for styling components. 
+	•	State Management: Use React Context API or Zustand for local component/feature state; consider Redux Toolkit for complex global state needs.
+	•	API Interaction: Utilize React Query for data fetching, caching, and synchronization where applicable.
+	•	Use shadcn components and always import new components using 'shadcn@latest'
+
+5. Internationalisation
+
+The program needs to fully support internalisation. Therefore follow the following rules in this regard
+    . Use the src/i18n/locales folder to store all user facing text.  
+    . There is a separate folder for each language. For every text you create, create translations of the same in the different language folders. If you are not sure of the exact translation use the web tool.
+
+
+6.  AI’s Role and Behavior
+
+As an AI assistant, your primary responsibility is to ensure strict adherence to these architectural guidelines.
+	•	Contextual Analysis: Before generating or modifying code, analyze the file’s location to determine its category (shared, feature, app, never-import).
+	•	Strict Adherence: Strictly adhere to the defined import rules. If a proposed change or generated code violates an import rule, explain the violation clearly and suggest an alternative that conforms to the architecture.
+	•	New File Placement: When asked to create new files, propose a location that aligns perfectly with the feature-based structure.
+	•	Refactoring Guidance: If refactoring is requested or identified as beneficial, prioritize moving feature-specific logic and components into their appropriate features/<featureName> folder, and global reusable logic into shared/.
+	•	Cross-Feature Interaction: If a task involves interaction that appears to cross feature boundaries (e.g., products needing users data), suggest refactoring the common logic into the shared layer or re-evaluating the design to maintain the one-way data flow and avoid direct feature-to-feature imports.
+	•	Architectural Analysis: When asked to analyze the application, consider the folder structure and data flow as primary architectural constraints and provide feedback based on these principles.
