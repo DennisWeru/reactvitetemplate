@@ -41,3 +41,17 @@ To leverage OpenHands' full capabilities, the repository must provide clear, con
 3.  **Rule Sync**: Updated `.cursor/rules/project-rules.mdc` to align with `AGENTS.md` and removed outdated internationalization instructions.
 4.  **Automation Hardening**: Updated `package.json` with a mandatory `verify` script (`npm run lint && npm run typecheck`) and a `format` script.
 5.  **Dependency Cleanup**: Removed the remaining `i18n` dependencies to keep the workspace lean and focused.
+
+## 2026-04-20: Default Model Update to Xiaomi Mimo V2 Pro
+
+### Decision
+Changed the default AI model used across the Lovabee UI and background agent from Google Gemini 3.1 Flash to `xiaomi/mimo-v2-pro`.
+
+### Rationale
+Requested by the user to align the platform with the Xiaomi Mimo V2 Pro model for all generation tasks by default.
+
+### Action Taken
+1.  **UI Updates**: Updated `app/page.tsx` and `app/generate/[projectId]/page.tsx` to use `xiaomi/mimo-v2-pro` as the default state and fallback.
+2.  **API Updates**: Updated `api/projects` and `api/generate-daytona` routes to default to the new model during project creation and environment setup.
+3.  **Agent Runner**: Updated `agent_runner.py` to use the new model as the default LLM.
+4.  **Agent Logic**: Updated `claude-code-main` configurations (`configs.ts` and `model.ts`) to register and recognize the new model, including display and marketing name mappings.
