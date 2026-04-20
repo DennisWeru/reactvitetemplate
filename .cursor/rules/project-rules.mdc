@@ -57,19 +57,16 @@ In addition to the structural rules, the following guidelines apply to React + V
 	•	API Interaction: Utilize React Query for data fetching, caching, and synchronization where applicable.
 	•	Use shadcn components and always import new components using 'shadcn@latest'
 
-5. Internationalisation
+5. Automated Verification
 
-The program needs to fully support internalisation. Therefore follow the following rules in this regard
-    . Use the src/i18n/locales folder to store all user facing text.  
-    . There is a separate folder for each language. For every text you create, create translations of the same in the different language folders. If you are not sure of the exact translation use the web tool.
+Before completing any task, the agent MUST run:
+- `npm run verify`: Ensures type safety and linting compliance.
+- `npm run format`: Ensures styling consistency.
 
+6. AI’s Role and Behavior
 
-6.  AI’s Role and Behavior
-
-As an AI assistant, your primary responsibility is to ensure strict adherence to these architectural guidelines.
-	•	Contextual Analysis: Before generating or modifying code, analyze the file’s location to determine its category (shared, feature, app, never-import).
-	•	Strict Adherence: Strictly adhere to the defined import rules. If a proposed change or generated code violates an import rule, explain the violation clearly and suggest an alternative that conforms to the architecture.
-	•	New File Placement: When asked to create new files, propose a location that aligns perfectly with the feature-based structure.
-	•	Refactoring Guidance: If refactoring is requested or identified as beneficial, prioritize moving feature-specific logic and components into their appropriate features/<featureName> folder, and global reusable logic into shared/.
-	•	Cross-Feature Interaction: If a task involves interaction that appears to cross feature boundaries (e.g., products needing users data), suggest refactoring the common logic into the shared layer or re-evaluating the design to maintain the one-way data flow and avoid direct feature-to-feature imports.
-	•	Architectural Analysis: When asked to analyze the application, consider the folder structure and data flow as primary architectural constraints and provide feedback based on these principles.
+As an AI assistant, your primary responsibility is to ensure strict adherence to the architectural guidelines defined in AGENTS.md and MAP.md.
+	•	Contextual Analysis: Before generating or modifying code, analyze the file’s location to determine its category (shared, feature, app).
+	•	Design Plan: Always create a DESIGN_PLAN.md before implementing structural changes.
+	•	Strict Adherence: Strictly adhere to the defined import rules. If a proposed change violates a rule, explain the violation and suggest an alternative.
+	•	shadcn-ui: Use non-interactive commands: `npx shadcn-ui@latest add [component] --yes`.

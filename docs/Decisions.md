@@ -26,3 +26,18 @@ To ensure the AI agent begins with a clean slate, avoiding interference from pre
 3.  **Updated Layout**: Removed `<Header />` from `src/app/layouts/layout/index.tsx` and ensured a clean white background.
 4.  **Deleted Boilerplate**: Removed `about` page, and components like `hero`, `header`, and `language-selector`.
 5.  **Reset Styles**: Stripped extra styles from `src/styles/globals.css` while maintaining shadcn/tailwind base.
+
+## 2026-04-20: Agent Capability Refinements
+
+### Decision
+Optimized the template for maximum compatibility with autonomous AI agents (specifically OpenHands).
+
+### Rationale
+To leverage OpenHands' full capabilities, the repository must provide clear, concise, and machine-readable instructions. Consolidating rules into `AGENTS.md` and providing a `MAP.md` reduces token usage and "hallucinations" while ensuring the agent follows the intended architecture.
+
+### Action Taken
+1.  **Instruction Centralization**: Created `AGENTS.md` to serve as the master source of truth for architectural rules, mandatory workflows, and automation commands.
+2.  **Navigation Enhancement**: Created `MAP.md` to provide a high-level overview of the repository structure.
+3.  **Rule Sync**: Updated `.cursor/rules/project-rules.mdc` to align with `AGENTS.md` and removed outdated internationalization instructions.
+4.  **Automation Hardening**: Updated `package.json` with a mandatory `verify` script (`npm run lint && npm run typecheck`) and a `format` script.
+5.  **Dependency Cleanup**: Removed the remaining `i18n` dependencies to keep the workspace lean and focused.
