@@ -1,5 +1,5 @@
 import React from 'react'
-import { createHashRouter, RouteObject } from 'react-router-dom'
+import { createBrowserRouter, RouteObject } from 'react-router-dom'
 import ErrorPage from '../shared/components/error-page'
 import { getDefaultLayout } from './layouts/layout'
 import HomePage from './pages/home'
@@ -11,7 +11,7 @@ export const routerObjects: RouteObject[] = [
   },
 ]
 
-export function createRouter(): ReturnType<typeof createHashRouter> {
+export function createRouter(): ReturnType<typeof createBrowserRouter> {
   const routeWrappers = routerObjects.map((router) => {
     // @ts-ignore TODO: better type support
     const getLayout = router.Component?.getLayout || getDefaultLayout
@@ -24,5 +24,5 @@ export function createRouter(): ReturnType<typeof createHashRouter> {
       ErrorBoundary: ErrorPage,
     }
   })
-  return createHashRouter(routeWrappers)
+  return createBrowserRouter(routeWrappers)
 }

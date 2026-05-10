@@ -55,3 +55,15 @@ Requested by the user to align the platform with the Xiaomi Mimo V2 Pro model fo
 2.  **API Updates**: Updated `api/projects` and `api/generate-daytona` routes to default to the new model during project creation and environment setup.
 3.  **Agent Runner**: Updated `agent_runner.py` to use the new model as the default LLM.
 4.  **Agent Logic**: Updated `claude-code-main` configurations (`configs.ts` and `model.ts`) to register and recognize the new model, including display and marketing name mappings.
+
+## 2026-05-11: Switching to BrowserRouter for Anchor Link Support
+
+### Decision
+Switched the template from `HashRouter` to `BrowserRouter` and updated the Vite `base` path to `/`.
+
+### Rationale
+URLs containing a `#` (e.g., `abc.com/#about`) were failing with a 404 error because `HashRouter` treats the fragment as a route path. Switching to `BrowserRouter` allows standard HTML anchor links to function correctly while maintaining clean URLs.
+
+### Action Taken
+1.  **Router Update**: Replaced `createHashRouter` with `createBrowserRouter` in `src/app/router.tsx`.
+2.  **Vite Config**: Updated `base: './'` to `base: '/'` in `vite.config.ts` to ensure absolute asset paths, which is required for correct `BrowserRouter` behavior on sub-routes.
