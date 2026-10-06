@@ -5,31 +5,41 @@
   "scripts": {
     "prepare": "husky install",
     "dev": "vite",
-    "build": "npm run verify && vite build",
-    "verify": "npm run typecheck && npm run lint",
-    "typecheck": "tsc --noEmit",
+    "build": "npm run verify && npm run build:app",
+    "verify": "npm run typecheck && npm run lint && npm run lint:sql",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p functions",
     "typecheck:watch": "tsc --noEmit --watch",
-    "lint": "eslint --quiet src --ext .ts,.tsx && stylelint \"src/**/*.{less,css}\"",
-    "lint:fix": "eslint --quiet --fix src --ext .ts,.tsx && stylelint --fix \"src/**/*.{less,css}\"",
-    "format": "prettier --write ."
+    "lint": "eslint --quiet src functions --ext .ts,.tsx && stylelint \"src/**/*.{less,css}\" && node scripts/check-secrets.mjs",
+    "lint:fix": "eslint --quiet --fix src functions --ext .ts,.tsx && stylelint --fix \"src/**/*.{less,css}\"",
+    "format": "prettier --write .",
+    "dev:api": "node scripts/dev-api.mjs",
+    "build:app": "vite build && npm run build:functions",
+    "build:functions": "wrangler pages functions build functions --outdir dist/_worker.js --output-routes-path dist/_routes.json --compatibility-date 2025-09-01 --compatibility-flags nodejs_compat",
+    "lint:sql": "node scripts/lint-migrations.mjs",
+    "db:push": "node scripts/db-push.mjs",
+    "db:types": "node scripts/db-types.mjs"
   },
   "dependencies": {
     "@loadable/component": "^5.15.3",
     "@radix-ui/react-popover": "^1.0.6",
     "@radix-ui/react-slot": "^1.0.2",
+    "@supabase/supabase-js": "^2.117.1",
     "@tanstack/react-query": "^4.29.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "framer-motion": "^11.1.7",
+    "hono": "^4.13.9",
     "lucide-react": "^0.277.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-helmet-async": "^2.0.5",
     "react-router-dom": "^6.10.0",
+    "stripe": "^18.5.0",
     "tailwind-merge": "^1.14.0",
-    "tailwindcss-animate": "^1.0.7",
-    "framer-motion": "^11.1.7"
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260702.1",
     "@commitlint/cli": "^17.5.1",
     "@commitlint/config-conventional": "^17.4.4",
     "@tanstack/react-query-devtools": "^4.29.1",
@@ -67,6 +77,7 @@
     "typescript": "^5.3.3",
     "vite": "^4.2.0",
     "vite-plugin-external": "^1.2.8",
-    "vite-plugin-svgr": "^2.4.0"
+    "vite-plugin-svgr": "^2.4.0",
+    "wrangler": "^3.114.17"
   }
 }

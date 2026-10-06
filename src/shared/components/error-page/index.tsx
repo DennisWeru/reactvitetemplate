@@ -5,7 +5,7 @@ export default function ErrorPage() {
   const error = useRouteError() as any
 
   return (
-    <div className="flex h-screen w-full flex-col items-center justify-center gap-4 text-left bg-white">
+    <div className="flex h-screen w-full flex-col items-center justify-center gap-4 bg-white text-left">
       <h1>Oops!</h1>
       <p>Sorry, an unexpected error has occurred.</p>
       <p className="font-mono text-sm text-muted-foreground">

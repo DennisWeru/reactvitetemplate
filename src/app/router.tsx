@@ -3,8 +3,10 @@ import { createBrowserRouter, RouteObject } from 'react-router-dom'
 import ErrorPage from '../shared/components/error-page'
 import { getDefaultLayout } from './layouts/layout'
 import HomePage from './pages/home'
+import { authRoutes } from './auth-routes'
 
 export const routerObjects: RouteObject[] = [
+  ...authRoutes,
   {
     path: '/',
     Component: HomePage,

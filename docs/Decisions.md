@@ -67,3 +67,20 @@ URLs containing a `#` (e.g., `abc.com/#about`) were failing with a 404 error bec
 ### Action Taken
 1.  **Router Update**: Replaced `createHashRouter` with `createBrowserRouter` in `src/app/router.tsx`.
 2.  **Vite Config**: Updated `base: './'` to `base: '/'` in `vite.config.ts` to ensure absolute asset paths, which is required for correct `BrowserRouter` behavior on sub-routes.
+
+## 2026-09-24: `fullstack` Branch for Lovabee Cloud
+
+### Decision
+Added a `fullstack` branch that adds a real backend on top of `main`. `main` stays the static template.
+
+### Rationale
+Generated apps need login, a database, email and payments that work the first time. The agent should extend working backend code, not write it from scratch. See the platform plan: `lovable-clone/docs/lovabee-cloud-backend-plan.md`.
+
+### Action Taken
+1. **Auth** (`src/features/auth`): `AuthProvider` wraps the app; `useAuth`, `useSignOut`, `AuthGuard`; `/login`, `/signup`, `/forgot-password`, `/reset-password`, `/account` routed via `src/app/auth-routes.ts`.
+2. **Billing** (`src/features/billing`): `CheckoutButton`, `BillingPortalButton`, `useSubscription`.
+3. **Server routes** (`functions/`, Hono on Cloudflare Pages Functions at `/api`): `requireUser`, admin client, Stripe checkout/portal/webhook (idempotent via `stripe_events`), Resend `sendEmail()` helper.
+4. **Migrations** (`supabase/migrations`): `profiles` (auto-created on signup), `customers`, `subscriptions`, `stripe_events`, all with RLS.
+5. **Scripts:** `lint:sql` (RLS/destructive-change linter), `db:push`, `db:types`, `dev:api` (wrangler on :8788, proxied by Vite), `check-secrets` (runs in `lint`), `build:app` (Vite + prebuilt `_worker.js`), `apply-cloud-overlay` (upgrades a `main`-based project).
+6. **Agent guidance:** backend rules appended to `AGENTS.md` between `lovabee-cloud` markers (the overlay copies that block); `MAP.md` updated.
+7. **Lint fix:** `src/shared/components/error-page/index.tsx` had a Prettier class-order error that already failed `npm run lint` on `main`; auto-fixed here. `main` still has it.

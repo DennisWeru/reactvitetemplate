@@ -27,5 +27,10 @@ export default defineConfig({
   server: {
     host: true,
     port: 5000,
+    // functions/ runs under `npm run dev:api` on 8788; proxying keeps the app
+    // on one origin in dev, exactly like Cloudflare Pages in production.
+    proxy: {
+      '/api': 'http://127.0.0.1:8788',
+    },
   },
 })

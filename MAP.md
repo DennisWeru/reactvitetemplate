@@ -22,7 +22,17 @@ src/
 │   └── types/            # Global type definitions
 ├── main.tsx              # Application Entry Point
 └── vite-env.d.ts         # Vite Environment Types
+
+functions/                # Server routes (Cloudflare Pages Functions, Hono), served at /api
+├── api/[[route]].ts      # Mounts the Hono app; don't add routes here
+└── _lib/                 # app.ts (routes), env.ts, supabase.ts (requireUser, admin client), billing.ts, email.ts
+supabase/migrations/      # SQL migrations, applied in filename order by `npm run db:push`
+scripts/                  # lint-migrations, db-push, db-types, dev-api, check-secrets, apply-cloud-overlay
 ```
+
+Backend entry points: `src/features/auth` (auth UI + hooks), `src/features/billing` (Stripe),
+`src/shared/lib/supabase.ts` (browser client), `src/shared/lib/api.ts` (`apiFetch` for /api),
+`src/shared/types/database.ts` (generated DB types).
 
 ## Key Files for Agents:
 - **`AGENTS.md`**: Core rules and architectural guidelines.

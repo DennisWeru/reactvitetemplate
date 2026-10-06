@@ -179,3 +179,8 @@ n
 yarn.lock
 package-lock.json
 pnpm-lock.yaml
+
+# Lovabee Cloud: local secrets and tooling state
+.dev.vars
+.lovabee/
+.wrangler/
