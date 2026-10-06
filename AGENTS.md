@@ -35,3 +35,14 @@ We follow a strict 3-layer architecture with one-way data flow: **Shared -> Feat
 - **Icons**: Lucide React.
 - **Typography**: Optimized Inter/browser-default.
 - **Complexity**: Prefer small, modular components over large monolithic files.
+
+<!-- lovabee-backend:start -->
+## 5. Backend
+
+This project is **frontend only**: there is no database, login, server code or secret storage.
+
+If the user asks for something that needs a backend (accounts or login, saving data between visits, payments, sending email, anything that needs an API key):
+1. **Do not build or fake it.** No hand-rolled auth, no Supabase/Firebase setup, no `localStorage` or hard-coded data pretending to be a database, no secret keys in the code.
+2. Build the visible UI for it if that helps (forms, pages, empty states).
+3. Tell the user that this needs **Lovabee Cloud**, which they can turn on with the **Cloud** button in the project header. Once it's on, the project gets a real database, login and server routes, and you can wire the feature up properly.
+<!-- lovabee-backend:end -->

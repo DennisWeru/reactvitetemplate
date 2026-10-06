@@ -67,3 +67,21 @@ URLs containing a `#` (e.g., `abc.com/#about`) were failing with a 404 error bec
 ### Action Taken
 1.  **Router Update**: Replaced `createHashRouter` with `createBrowserRouter` in `src/app/router.tsx`.
 2.  **Vite Config**: Updated `base: './'` to `base: '/'` in `vite.config.ts` to ensure absolute asset paths, which is required for correct `BrowserRouter` behavior on sub-routes.
+
+## 2026-10-06: `main` Is the Frontend-Only Template; Backend Lives on `fullstack`
+
+### Decision
+Kept two branches instead of merging the backend into `main`:
+- **`main`**: static template for projects without Lovabee Cloud. `AGENTS.md` section 5 says the project has no backend and tells the agent to point users to Lovabee Cloud rather than building or faking one.
+- **`fullstack`**: `main` plus the backend (auth, billing, `/api`, migrations, scripts). Its `AGENTS.md` section 5 holds the backend rules instead.
+
+### Rationale
+Merging would give every static site backend instructions that aren't true ("already connected"), unused auth pages and heavy dependencies. Agents told about a backend that doesn't exist try to build one; that is the failure seen on 2026-10-06.
+
+### How to change the template
+1. Changes that apply to every project (UI kit, lint config, frontend rules) go on **`main`**, then merge `main` into `fullstack`. Never merge `fullstack` into `main`.
+2. Backend-only changes go on **`fullstack`**.
+3. Section 5 of `AGENTS.md` sits between `<!-- lovabee-backend:start -->` and `<!-- lovabee-backend:end -->` on both branches. When merging `main` into `fullstack`, keep the `fullstack` version of that section. `scripts/apply-cloud-overlay.mjs` swaps the section when a `main` project enables Cloud.
+
+### Action Taken
+Added section 5 to `AGENTS.md` and fixed the Prettier error in `src/shared/components/error-page/index.tsx` that made `npm run lint` fail.
