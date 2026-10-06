@@ -96,18 +96,51 @@ function patchViteConfig() {
   )
 }
 
+// Appended at the end so the user's own routes keep priority over the
+// template's when both define the same path (React Router picks the first of
+// equally specific routes).
 function patchRouter() {
   patchFile(
     'src/app/router.tsx',
     (c) => c.includes('authRoutes'),
     (c) => {
-      if (!/export const routerObjects: RouteObject\[\] = \[/.test(c)) return c
+      const open = c.search(/export const routerObjects: RouteObject\[\] = \[/)
+      if (open === -1) return c
+      const start = c.indexOf('[', c.indexOf('=', open))
+      let depth = 0
+      let close = -1
+      for (let i = start; i < c.length; i++) {
+        if (c[i] === '[') depth++
+        if (c[i] === ']' && --depth === 0) {
+          close = i
+          break
+        }
+      }
+      if (close === -1) return c
+      const body = c.slice(start + 1, close).trimEnd()
+      const separator = body.length && !body.endsWith(',') ? ',' : ''
       return c
+        .slice(0, start + 1)
+        .concat(`${body}${separator}\n  ...authRoutes,\n`, c.slice(close))
         .replace(/(import [^\n]+\n)(?![\s\S]*^import )/m, "$1import { authRoutes } from './auth-routes'\n")
-        .replace(/export const routerObjects: RouteObject\[\] = \[/, '$&\n  ...authRoutes,')
     },
     'Add the auth pages to the router: `import { authRoutes } from "./auth-routes"` in src/app/router.tsx and spread `...authRoutes` into the routes.',
   )
+}
+
+const AUTH_PATHS = ['/login', '/signup', '/forgot-password', '/reset-password', '/account']
+
+// Run before copying: anything found here was built by the user before Cloud
+// and must be kept and wired up, not replaced by the template's version.
+function findExistingAuthUi() {
+  const found = []
+  const router = fs.existsSync(p('src/app/router.tsx')) ? read(p('src/app/router.tsx')) : ''
+  for (const route of AUTH_PATHS) {
+    if (router.includes(`'${route}'`) || router.includes(`"${route}"`)) found.push(`route ${route}`)
+  }
+  if (fs.existsSync(p('src/features/auth')))
+    found.push('src/features/auth (existing, so template auth files were only added where missing)')
+  return found
 }
 
 function patchApp() {
@@ -141,31 +174,66 @@ function appendOnce(rel, marker, block) {
   fs.writeFileSync(file, `${content.trimEnd()}\n\n${block.trim()}\n`)
 }
 
-function appendAgentRules() {
+const BACKEND_START = '<!-- lovabee-backend:start -->'
+const BACKEND_END = '<!-- lovabee-backend:end -->'
+
+// main's AGENTS.md says the project has no backend; leaving that next to the
+// backend rules would contradict them, so the whole marked section is swapped.
+function replaceAgentBackendSection() {
   const agents = read(t('AGENTS.md'))
-  const start = agents.indexOf('<!-- lovabee-cloud:start -->')
-  const end = agents.indexOf('<!-- lovabee-cloud:end -->')
+  const start = agents.indexOf(BACKEND_START)
+  const end = agents.indexOf(BACKEND_END)
   if (start === -1 || end === -1) return
-  appendOnce('AGENTS.md', '<!-- lovabee-cloud:start -->', agents.slice(start, end + '<!-- lovabee-cloud:end -->'.length))
+  const section = agents.slice(start, end + BACKEND_END.length)
+
+  const file = p('AGENTS.md')
+  const current = fs.existsSync(file) ? read(file) : ''
+  if (current.includes('<!-- lovabee-cloud:start -->')) return
+  const from = current.indexOf(BACKEND_START)
+  const to = current.indexOf(BACKEND_END)
+  const next =
+    from !== -1 && to !== -1
+      ? current.slice(0, from) + section + current.slice(to + BACKEND_END.length)
+      : `${current.trimEnd()}\n\n${section}\n`
+  fs.writeFileSync(file, next)
 }
 
+const existingAuthUi = findExistingAuthUi()
 for (const rel of COPY_IF_MISSING) copyIfMissing(rel)
 mergePackageJson()
 patchViteConfig()
 patchRouter()
 patchApp()
 patchViteEnvTypes()
-appendAgentRules()
-appendOnce('.gitignore', '.dev.vars', '# Lovabee Cloud: local secrets and tooling state\n.dev.vars\n.lovabee/\n.wrangler/')
+replaceAgentBackendSection()
+appendOnce(
+  '.gitignore',
+  '.dev.vars',
+  '# Lovabee Cloud: local secrets and tooling state\n.dev.vars\n.lovabee/\n.wrangler/',
+)
+
+if (existingAuthUi.length) {
+  todos.push(
+    `This project already had its own auth UI (${existingAuthUi.join('; ')}). Keep the user's design: connect it to ` +
+      'useAuth()/supabase.auth from src/features/auth, then delete the duplicate template page and its entry in ' +
+      'src/app/auth-routes.ts. Remove any fake auth (localStorage users, hard-coded accounts).',
+  )
+}
 
 if (todos.length) {
   appendOnce(
     'decisions.md',
     '## Lovabee Cloud overlay: manual steps',
-    ['## Lovabee Cloud overlay: manual steps', 'Finish these before anything else:', ...todos.map((x) => `- [ ] ${x}`)].join(
-      '\n',
-    ),
+    [
+      '## Lovabee Cloud overlay: manual steps',
+      'Finish these before anything else:',
+      ...todos.map((x) => `- [ ] ${x}`),
+    ].join('\n'),
   )
 }
 
-console.log(`Lovabee Cloud overlay applied to ${projectDir}${todos.length ? ` (${todos.length} manual step(s) in decisions.md)` : ''}`)
+console.log(
+  `Lovabee Cloud overlay applied to ${projectDir}${
+    todos.length ? ` (${todos.length} manual step(s) in decisions.md)` : ''
+  }`,
+)

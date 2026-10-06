@@ -36,7 +36,7 @@ We follow a strict 3-layer architecture with one-way data flow: **Shared -> Feat
 - **Typography**: Optimized Inter/browser-default.
 - **Complexity**: Prefer small, modular components over large monolithic files.
 
-<!-- lovabee-cloud:start -->
+<!-- lovabee-backend:start -->
 ## 5. Backend (Lovabee Cloud)
 
 This project has a real backend: Supabase (Postgres, Auth, Storage) plus server routes in `functions/` served at `/api`. It is already connected. **Extend it, never re-create it.**
@@ -49,6 +49,7 @@ This project has a real backend: Supabase (Postgres, Auth, Storage) plus server 
 5. **Where code goes:** read and write data from the browser with `supabase` (`src/shared/lib/supabase.ts`) and let RLS protect it. Only add a route in `functions/` when it needs a secret, a webhook or a third-party API. Call it with `apiFetch('/your-route')` (`src/shared/lib/api.ts`), which sends the user's session.
 6. **Secrets:** never put a secret key in `src/` (it ships to the browser; `npm run lint` fails on it). In `functions/`, read secrets from `c.env.NAME`. If a feature needs a key the user hasn't added (e.g. `STRIPE_SECRET_KEY`, `RESEND_API_KEY`), say so and ask them to add it in Lovabee Cloud settings.
 7. **Admin client:** `createAdminClient(c.env)` bypasses RLS. Use it only in `functions/`, only for work the user can't do themselves, and always filter by `c.get('user').id`.
+8. **Projects that existed before Cloud:** the screens are the user's design. Keep them and connect them to the backend (swap mock data for Supabase queries, point their login form at `supabase.auth`), rather than replacing them with the template pages. Remove fake auth and mock data once the real version works. If `decisions.md` has a "Lovabee Cloud overlay: manual steps" section, do those first.
 
 ### What is already built
 | Need | Use |
@@ -65,4 +66,4 @@ This project has a real backend: Supabase (Postgres, Auth, Storage) plus server 
 - `npm run verify`: typecheck (app + functions), lint, secret scan, `lint:sql`. Must pass.
 - `npm run db:push` / `npm run db:types`: apply migrations / regenerate DB types.
 - `npm run dev:api`: runs `functions/` on :8788; Vite proxies `/api` to it.
-<!-- lovabee-cloud:end -->
+<!-- lovabee-backend:end -->

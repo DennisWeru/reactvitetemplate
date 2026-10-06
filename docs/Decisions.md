@@ -84,3 +84,21 @@ Generated apps need login, a database, email and payments that work the first ti
 5. **Scripts:** `lint:sql` (RLS/destructive-change linter), `db:push`, `db:types`, `dev:api` (wrangler on :8788, proxied by Vite), `check-secrets` (runs in `lint`), `build:app` (Vite + prebuilt `_worker.js`), `apply-cloud-overlay` (upgrades a `main`-based project).
 6. **Agent guidance:** backend rules appended to `AGENTS.md` between `lovabee-cloud` markers (the overlay copies that block); `MAP.md` updated.
 7. **Lint fix:** `src/shared/components/error-page/index.tsx` had a Prettier class-order error that already failed `npm run lint` on `main`; auto-fixed here. `main` still has it.
+
+## 2026-10-06: `main` Is the Frontend-Only Template; Backend Lives on `fullstack`
+
+### Decision
+Kept two branches instead of merging the backend into `main`:
+- **`main`**: static template for projects without Lovabee Cloud. `AGENTS.md` section 5 says the project has no backend and tells the agent to point users to Lovabee Cloud rather than building or faking one.
+- **`fullstack`**: `main` plus the backend (auth, billing, `/api`, migrations, scripts). Its `AGENTS.md` section 5 holds the backend rules instead.
+
+### Rationale
+Merging would give every static site backend instructions that aren't true ("already connected"), unused auth pages and heavy dependencies. Agents told about a backend that doesn't exist try to build one; that is the failure seen on 2026-10-06.
+
+### How to change the template
+1. Changes that apply to every project (UI kit, lint config, frontend rules) go on **`main`**, then merge `main` into `fullstack`. Never merge `fullstack` into `main`.
+2. Backend-only changes go on **`fullstack`**.
+3. Section 5 of `AGENTS.md` sits between `<!-- lovabee-backend:start -->` and `<!-- lovabee-backend:end -->` on both branches. When merging `main` into `fullstack`, keep the `fullstack` version of that section. `scripts/apply-cloud-overlay.mjs` swaps the section when a `main` project enables Cloud.
+
+### Action Taken
+Added section 5 to `AGENTS.md` and fixed the Prettier error in `src/shared/components/error-page/index.tsx` that made `npm run lint` fail.
